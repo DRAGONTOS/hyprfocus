@@ -2,8 +2,6 @@
 
 a plugin which provides focus animations for us borderless folks, originally inspired by [flashfocus](https://github.com/fennerm/flashfocus)!
 
-i'm on a tight schedule, so pull requests are welcome!
-
 ## animations
 
 flash
@@ -14,47 +12,22 @@ shrink
 
 ![preview](shrink.gif)
 
-## compilation & installation
+## installation
 
 instructions based on [the official wiki](https://wiki.hyprland.org/Plugins/Using-Plugins/#compiling-official-plugins)
 
-**1) clone hyprfocus and cd into it,**
-
-`git clone https://github.com/VortexCoyote/hyprfocus && cd hyprfocus`
-
-**2) clone hyprland and cd into it**
-
-`git clone --recursive https://github.com/hyprwm/Hyprland && cd Hyprland`
-
-**3) checkout the correct release tag matching with your version of hyprland**
-
-`git checkout tags/v0.26.0`
-
-**4) prepare the hyprland source for plugin compilation**
-
-`make all && sudo make installheaders`
-
-**5) cd back and make**
-
-`cd .. && make all`
-
-**6) profit,** make sure you use the full path to the .so file
-
-`hyprctl plugin load <full .so path>`
-
-**If you compile hyprland manually and install with `sudo make install` you can skip the cloning hyprland sources and `make pluginenv` part.**
+```
+hyprpm add https://github.com/hyprfocus
+```
 
 ## getting started
 
 to start using hyprfocus, add this to your hyprland config:
 ```
-plugin = <full .so path>
-
 plugin:hyprfocus {
     enabled = yes
 
-    keyboard_focus_animation = shrink
-    mouse_focus_animation = flash
+    focus_animation = flash
 
     bezier = bezIn, 0.5,0.0,1.0,0.5
     bezier = bezOut, 0.0,0.5,0.5,1.0
@@ -85,9 +58,7 @@ plugin:hyprfocus {
 
 `enabled` (yes/no) -> enable or disable the plugin
 
-`keyboard_focus_animation` (flash/shrink/nothing) -> animation for keyboard-driven focus
-
-`mouse_focus_animation` (flash/shrink/nothing) -> animation for mouse pressed focus (setting input:follow_mouse = 0, input:float_switch_override_focus = 0 and input:mouse_refocus = false is recommended)
+`focus_animation` (flash/shrink/none) -> animation for keyboard-driven focus
 
 ### animations configuration
 
@@ -125,6 +96,6 @@ hyprfocus can also flash the currently focused window through the `animatefocuse
 bind = $mod, space, animatefocused
 ```
 
-## future plans
-
-I'm mostly planning on implementing more animations, for example a popin-popout bounce animation. But if you have any suggestions, feel free to create a git issue!
+# Special thanks
+- [flashfocus](https://github.com/fennerm/flashfocus): An earlier project of similar nature
+- [Original repo](https://github.com/VortexCoyote/hyprfocus.git)

@@ -1,4 +1,4 @@
- #define WLR_USE_UNSTABLE
+#define WLR_USE_UNSTABLE
 
 #include <hyprland/src/plugins/PluginAPI.hpp>
 
@@ -19,10 +19,11 @@ bool        g_bMouseWasPressed          = false;
 std::unordered_map<std::string, std::unique_ptr<IFocusAnimation>> g_mAnimations;
 
 void flashWindow(CWindow* pWindow) {
-    auto* const PTYPE = g_bMouseWasPressed  ? &HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprfocus:mouse_focus_animation")->strValue
-                                            : &HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprfocus:keyboard_focus_animation")->strValue;
+    const auto& configValue = HyprlandAPI::getConfigValue(PHANDLE, "plugin:hyprfocus:focus_animation")->strValue;
 
-    g_mAnimations[*PTYPE]->onWindowFocus(pWindow, PHANDLE);
+    auto it = g_mAnimations.find(configValue);
+    if (it != g_mAnimations.end()) 
+        it->second->onWindowFocus(pWindow, PHANDLE);
 }
 
 void flashCurrentWindow(std::string) {
@@ -54,7 +55,7 @@ static void onActiveWindowChange(void* self, std::any data) {
         flashWindow(PWINDOW);
         g_pPreviouslyFocusedWindow = PWINDOW;
 
-    } catch (std::bad_any_cast& e) { }
+    } catch (std::bad_any_cast& e) {}
 }
 
 static void onMouseButton(void* self, std::any data) {
@@ -62,26 +63,23 @@ static void onMouseButton(void* self, std::any data) {
         auto* const PWLRMOUSEBUTTONEVENT = std::any_cast<wlr_pointer_button_event*>(data);
         g_bMouseWasPressed = PWLRMOUSEBUTTONEVENT->state == WLR_BUTTON_PRESSED;
 
-    } catch (std::bad_any_cast& e) { }
+    } catch (std::bad_any_cast& e) {}
 }
 
 // Do NOT change this function.
-APICALL EXPORT std::string PLUGIN_API_VERSION() {
-    return HYPRLAND_API_VERSION;
-}
+APICALL EXPORT std::string PLUGIN_API_VERSION() { return HYPRLAND_API_VERSION; }
 
 APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
     PHANDLE = handle;    
 
     HyprlandAPI::addConfigValue(PHANDLE, "plugin:hyprfocus:enabled",                    SConfigValue{.intValue = 0      });
-    HyprlandAPI::addConfigValue(PHANDLE, "plugin:hyprfocus:keyboard_focus_animation",   SConfigValue{.strValue = "flash"});
-    HyprlandAPI::addConfigValue(PHANDLE, "plugin:hyprfocus:mouse_focus_animation",      SConfigValue{.strValue = "flash"});
+    HyprlandAPI::addConfigValue(PHANDLE, "plugin:hyprfocus:focus_animation",            SConfigValue{.strValue = "flash"});
     
     HyprlandAPI::addDispatcher(PHANDLE, "animatefocused", &flashCurrentWindow);
 
     g_mAnimations["flash"   ] = std::make_unique<CFlash>();
     g_mAnimations["shrink"  ] = std::make_unique<CShrink>();
-    g_mAnimations["nothing" ] = std::make_unique<IFocusAnimation>();
+    g_mAnimations["none"    ] = std::make_unique<IFocusAnimation>();
 
     for(auto& [name, pAnimation] : g_mAnimations) {
         pAnimation->init(PHANDLE, name);
@@ -95,4 +93,4 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
     return {"hyprfocus", "animate windows on focus", "Vortex", "2.0"};
 }
 
-APICALL EXPORT void PLUGIN_EXIT() { }
+APICALL EXPORT void PLUGIN_EXIT() {}
